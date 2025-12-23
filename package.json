@@ -1,4 +1,3 @@
-
 {
   "name": "tic-taq-toe",
   "private": true,
@@ -15,6 +14,7 @@
     "lucide-react": "^0.446.0"
   },
   "devDependencies": {
+    "@types/node": "^20.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "autoprefixer": "^10.4.20",

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { GameMode, Difficulty, Player, SquareValue } from './types';
 import { calculateWinner, getBestMove } from './services/gameLogic';
@@ -101,6 +100,10 @@ const App: React.FC = () => {
     }
   };
 
+  const totalGames = scores.X + scores.O + scores.Draw;
+  const winRateX = totalGames > 0 ? Math.round((scores.X / totalGames) * 100) : 0;
+  const winRateO = totalGames > 0 ? Math.round((scores.O / totalGames) * 100) : 0;
+
   const leader = useMemo(() => {
     if (scores.X > scores.O) return 'X';
     if (scores.O > scores.X) return 'O';
@@ -110,44 +113,85 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col p-4 space-y-12 max-w-6xl mx-auto">
       {/* Header & Stats */}
-      <div className="w-full space-y-8 animate-fade-in mt-10">
+      <div className="w-full space-y-12 animate-fade-in mt-10">
         <h1 className="text-6xl sm:text-8xl font-black text-center tracking-tighter bg-clip-text text-transparent bg-gradient-to-br from-cyan-400 via-white to-rose-400">
           Tic Taq Toe
         </h1>
         
-        <div className="flex flex-col md:flex-row items-stretch justify-center gap-6 w-full max-w-4xl mx-auto">
-          {/* Player X Card */}
-          <div className={`relative flex-1 glass p-6 rounded-[2.5rem] border-t-2 transition-all duration-500 ${leader === 'X' ? 'border-cyan-400 scale-105 shadow-2xl' : 'border-white/5 opacity-80'}`}>
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-cyan-400/10 flex items-center justify-center border border-cyan-400/20">
-                <XIcon className="w-9 h-9 text-cyan-400" />
+        <div className="flex flex-col md:flex-row items-stretch justify-center gap-6 w-full max-w-5xl mx-auto">
+          {/* Player X Enhanced Card */}
+          <div className={`relative flex-1 glass p-6 rounded-[2.5rem] border-t-2 transition-all duration-500 overflow-hidden ${leader === 'X' ? 'border-cyan-400 scale-105 shadow-[0_20px_60px_-10px_rgba(34,211,238,0.25)]' : 'border-white/5 opacity-80'}`}>
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-16 h-16 rounded-3xl bg-cyan-400/10 flex items-center justify-center border border-cyan-400/20 shadow-inner">
+                <XIcon className="w-10 h-10 text-cyan-400" />
               </div>
               <div className="flex-1 overflow-hidden">
                 <span className="block text-[10px] uppercase font-black text-slate-500 tracking-widest truncate">{playerNames.X}</span>
-                <span className="text-4xl font-black text-white">{scores.X}</span>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-5xl font-black text-white">{scores.X}</span>
+                  <span className="text-xs font-bold text-slate-600 uppercase tracking-tighter">pts</span>
+                </div>
               </div>
             </div>
-            {leader === 'X' && <div className="absolute top-2 right-4 text-[8px] font-black text-cyan-400 uppercase tracking-widest animate-pulse">Leader</div>}
+            
+            <div className="space-y-2">
+              <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-tighter">
+                <span className="text-slate-500">Efficiency</span>
+                <span className="text-cyan-400">{winRateX}%</span>
+              </div>
+              <div className="h-2 w-full bg-slate-900 rounded-full overflow-hidden border border-white/5 p-0.5">
+                <div className="h-full bg-cyan-400 rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_#22d3ee]" style={{ width: `${winRateX}%` }}></div>
+              </div>
+            </div>
+
+            {leader === 'X' && (
+              <div className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-400/20 border border-cyan-400/30">
+                <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></div>
+                <span className="text-[9px] font-black text-cyan-400 uppercase tracking-widest">Leading</span>
+              </div>
+            )}
           </div>
 
-          {/* Draws */}
-          <div className="flex flex-col items-center justify-center px-8 py-4 glass rounded-3xl border border-white/5 opacity-60">
+          {/* Stalemates Display */}
+          <div className="flex flex-col items-center justify-center px-10 py-6 glass rounded-[2.5rem] border border-white/5 opacity-60">
+            <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center mb-3">
+               <span className="text-slate-400 font-bold text-lg">🤝</span>
+            </div>
             <span className="text-[10px] uppercase font-black text-slate-500 tracking-widest mb-1">Stalemates</span>
-            <span className="text-2xl font-black text-slate-300">{scores.Draw}</span>
+            <span className="text-3xl font-black text-slate-200">{scores.Draw}</span>
           </div>
 
-          {/* Player O Card */}
-          <div className={`relative flex-1 glass p-6 rounded-[2.5rem] border-t-2 transition-all duration-500 ${leader === 'O' ? 'border-rose-400 scale-105 shadow-2xl' : 'border-white/5 opacity-80'}`}>
-            <div className="flex items-center gap-4 justify-end text-right">
+          {/* Player O Enhanced Card */}
+          <div className={`relative flex-1 glass p-6 rounded-[2.5rem] border-t-2 transition-all duration-500 overflow-hidden ${leader === 'O' ? 'border-rose-400 scale-105 shadow-[0_20px_60px_-10px_rgba(244,63,94,0.25)]' : 'border-white/5 opacity-80'}`}>
+            <div className="flex items-center gap-4 mb-4 justify-end text-right">
               <div className="flex-1 overflow-hidden">
                 <span className="block text-[10px] uppercase font-black text-slate-500 tracking-widest truncate">{playerNames.O}</span>
-                <span className="text-4xl font-black text-white">{scores.O}</span>
+                <div className="flex items-baseline gap-2 justify-end">
+                  <span className="text-xs font-bold text-slate-600 uppercase tracking-tighter">pts</span>
+                  <span className="text-5xl font-black text-white">{scores.O}</span>
+                </div>
               </div>
-              <div className="w-14 h-14 rounded-2xl bg-rose-400/10 flex items-center justify-center border border-rose-400/20">
-                <OIcon className="w-9 h-9 text-rose-400" />
+              <div className="w-16 h-16 rounded-3xl bg-rose-400/10 flex items-center justify-center border border-rose-400/20 shadow-inner">
+                <OIcon className="w-10 h-10 text-rose-400" />
               </div>
             </div>
-            {leader === 'O' && <div className="absolute top-2 left-4 text-[8px] font-black text-rose-400 uppercase tracking-widest animate-pulse">Leader</div>}
+
+            <div className="space-y-2">
+              <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-tighter">
+                <span className="text-rose-400">{winRateO}%</span>
+                <span className="text-slate-500">Efficiency</span>
+              </div>
+              <div className="h-2 w-full bg-slate-900 rounded-full overflow-hidden border border-white/5 p-0.5">
+                <div className="h-full bg-rose-400 rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_#f43f5e] ml-auto" style={{ width: `${winRateO}%` }}></div>
+              </div>
+            </div>
+
+            {leader === 'O' && (
+              <div className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-400/20 border border-rose-400/30">
+                <span className="text-[9px] font-black text-rose-400 uppercase tracking-widest">Leading</span>
+                <div className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse"></div>
+              </div>
+            )}
           </div>
         </div>
       </div>
