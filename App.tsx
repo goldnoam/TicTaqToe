@@ -10,6 +10,7 @@ const App: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [moveLog, setMoveLog] = useState<{ player: string; symbol: Player; index: number }[]>([]);
+  const [confirmDialog, setConfirmDialog] = useState<{ isOpen: boolean; type: 'game' | 'metrics' } | null>(null);
   
   const [playerNames, setPlayerNames] = useState({ X: 'Player X', O: 'Player O' });
   const [mode, setMode] = useState<GameMode>(GameMode.SINGLE);
@@ -82,21 +83,35 @@ const App: React.FC = () => {
     }
   };
 
-  const resetGame = () => {
+  const performResetGame = () => {
     setHistory([Array(9).fill(null)]);
     setCurrentStep(0);
     setMoveLog([]);
+    setConfirmDialog(null);
   };
 
-  const resetScores = () => {
+  const performResetScores = () => {
     setScores({ X: 0, O: 0, Draw: 0 });
+    setConfirmDialog(null);
+  };
+
+  const handleResetGameClick = () => {
+    if (currentStep > 0 && !isGameOver) {
+      setConfirmDialog({ isOpen: true, type: 'game' });
+    } else {
+      performResetGame();
+    }
+  };
+
+  const handleResetScoresClick = () => {
+    setConfirmDialog({ isOpen: true, type: 'metrics' });
   };
 
   const updateSettings = (newMode: GameMode, newDifficulty: Difficulty) => {
     if (newMode !== mode || newDifficulty !== difficulty) {
       setMode(newMode);
       setDifficulty(newDifficulty);
-      resetGame();
+      performResetGame();
     }
   };
 
@@ -242,7 +257,7 @@ const App: React.FC = () => {
                 <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-12">
                   {winner === 'Draw' ? "Balanced State Detected" : `${winner === 'X' ? playerNames.X : playerNames.O} Wins Round`}
                 </p>
-                <button onClick={resetGame} className="bg-white text-slate-950 px-16 py-5 rounded-[2.5rem] font-black hover:bg-cyan-400 hover:text-white transition-all shadow-2xl active:scale-95 uppercase tracking-widest text-xs">
+                <button onClick={performResetGame} className="bg-white text-slate-950 px-16 py-5 rounded-[2.5rem] font-black hover:bg-cyan-400 hover:text-white transition-all shadow-2xl active:scale-95 uppercase tracking-widest text-xs">
                   Next Iteration
                 </button>
               </div>
@@ -278,7 +293,7 @@ const App: React.FC = () => {
                 <span className="text-[9px] uppercase font-black">Redo</span>
               </button>
             </div>
-            <button onClick={resetGame} className="w-full bg-slate-50 hover:bg-white text-slate-950 py-4 rounded-2xl font-black transition-all shadow-xl active:scale-95 text-xs uppercase tracking-widest">
+            <button onClick={handleResetGameClick} className="w-full bg-slate-50 hover:bg-white text-slate-950 py-4 rounded-2xl font-black transition-all shadow-xl active:scale-95 text-xs uppercase tracking-widest">
               Reset Session
             </button>
           </div>
@@ -287,12 +302,46 @@ const App: React.FC = () => {
                 <SettingsIcon className="w-4 h-4" />
                 Config
               </button>
-              <button onClick={resetScores} className="w-full text-rose-500/30 hover:text-rose-400 py-2 text-[8px] font-black uppercase tracking-widest transition-all">
+              <button onClick={handleResetScoresClick} className="w-full text-rose-500/30 hover:text-rose-400 py-2 text-[8px] font-black uppercase tracking-widest transition-all">
                 Wipe Metrics
               </button>
           </div>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      {confirmDialog?.isOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md animate-fade-in" onClick={() => setConfirmDialog(null)}></div>
+          <div className="relative glass w-full max-w-sm rounded-[2.5rem] p-8 text-center animate-scale-in border border-white/10 shadow-2xl">
+             <div className="w-16 h-16 rounded-full bg-rose-500/20 border border-rose-500/30 flex items-center justify-center mx-auto mb-6">
+                <svg className="w-8 h-8 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+             </div>
+             <h3 className="text-2xl font-black text-white mb-2 uppercase tracking-tight">Warning</h3>
+             <p className="text-slate-400 text-sm mb-8 leading-relaxed">
+               {confirmDialog.type === 'game' 
+                 ? "Are you sure you want to terminate the current session? Unsaved progress will be lost." 
+                 : "This will permanently erase all cumulative score data. This action is irreversible."}
+             </p>
+             <div className="flex flex-col gap-3">
+                <button 
+                  onClick={confirmDialog.type === 'game' ? performResetGame : performResetScores}
+                  className="w-full bg-rose-500 hover:bg-rose-600 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 shadow-lg"
+                >
+                  Confirm Reset
+                </button>
+                <button 
+                  onClick={() => setConfirmDialog(null)}
+                  className="w-full bg-white/5 hover:bg-white/10 text-slate-400 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all border border-white/5"
+                >
+                  Cancel
+                </button>
+             </div>
+          </div>
+        </div>
+      )}
 
       {/* Production Footer */}
       <footer className="w-full py-12 mt-auto border-t border-white/5 flex flex-col items-center gap-6 animate-fade-in opacity-40 hover:opacity-100 transition-opacity">
