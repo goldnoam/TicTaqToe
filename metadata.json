@@ -1,5 +1,5 @@
 {
-  "name": "Gemini Tic-Tac-Toe",
+  "name": "Tic-Tac-Toe",
   "description": "A modern, aesthetic Tic-Tac-Toe game featuring an unbeatable AI powered by Minimax and witty commentary from Google Gemini.",
   "requestFramePermissions": []
 }
